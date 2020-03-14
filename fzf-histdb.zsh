@@ -35,13 +35,13 @@ histdb-fzf-query(){
   local timecol="strftime(case when $mst > $dst then '%H:%M' else '%d/%m' end, max_start, 'unixepoch', 'localtime') as time"
 
   local query="
-select 
-id, 
-${timecol}, 
-CASE exit_status WHEN 0 THEN '' ELSE '${fg[red]}' END || argv as cmd, 
-CASE exit_status WHEN 0 THEN '' ELSE '${reset_color}' END 
-from 
-(select 
+select
+id,
+${timecol},
+CASE exit_status WHEN 0 THEN '' ELSE '${fg[red]}' END || argv as cmd,
+CASE exit_status WHEN 0 THEN '' ELSE '${reset_color}' END
+from
+(select
   ${cols}
 from
   history
@@ -52,7 +52,7 @@ group by history.command_id, history.place_id
 order by max_start desc)
 order by max_start desc"
 
-  _histdb_query -separator '  ' "$query" 
+  _histdb_query -separator '  ' "$query"
 }
 
 histdb-detail(){
@@ -60,7 +60,7 @@ histdb-detail(){
   local where="(history.id == '$(sed -e "s/'/''/g" <<< "$2" | tr -d '\000')')"
 
   local cols="
-    history.id as id, 
+    history.id as id,
     commands.argv as argv,
     max(start_time) as max_start,
     exit_status,
@@ -68,18 +68,18 @@ histdb-detail(){
     count() as runcount,
     history.session as session,
     places.host as host,
-    places.dir as dir" 
+    places.dir as dir"
 
   local query="
-    select 
-      strftime('%d/%m/%Y %H:%M', max_start, 'unixepoch', 'localtime') as time, 
-      exit_status, 
-      secs, 
-      host, 
-      dir, 
-      session, 
-      argv as cmd 
-    from 
+    select
+      strftime('%d/%m/%Y %H:%M', max_start, 'unixepoch', 'localtime') as time,
+      exit_status,
+      secs,
+      host,
+      dir,
+      session,
+      argv as cmd
+    from
       (select ${cols}
       from
         history
@@ -102,7 +102,7 @@ histdb-detail(){
     # Duration yellow if > 1 min
     array[3]=$(echo "\033[33m${array[3]}\033[0m")
   fi
-  printf "\033[1mLast run\033[0m\n\nTime:      %s\nStatus:    %s\nDuration:  %s sec.\nHost:      %s\nDirectory: %s\nSessionid: %s\nCommand:\n\n\t\033[1m%s\n\033[0m" $array
+  printf "\033[1mLast run\033[0m\n\nTime:      %s\nStatus:    %s\nDuration:  %s sec.\nHost:      %s\nDirectory: %s\nSessionid: %s\nCommand:\n\n\t\033[1m%s\n\033[0m" "${array[@]}"
 }
 
 histdb-fzf-log() {
@@ -126,11 +126,11 @@ histdb-fzf-widget() {
   else
     mode=1
   fi
-  
+
   if [[ "${HISTDB_FZF_DEFAULT_MODE}" =~ [123] ]];then
     mode=${HISTDB_FZF_DEFAULT_MODE}
   fi
-  
+
   histdb-fzf-log "Start mode ${modes[$mode]} ($mode)"
   exitkey='ctrl-r'
   setopt localoptions noglobsubst noposixbuiltins pipefail 2> /dev/null
@@ -140,7 +140,7 @@ histdb-fzf-widget() {
       mode=${exitkey[$(($MBEGIN+1)),$MEND]}
       histdb-fzf-log "mode changed to ${modes[$mode]} ($mode)"
     fi
-    case "$modes[$mode]" in 
+    case "$modes[$mode]" in
       'session')
         cmd_opts="-s"
         typ="Session local history ${fg[blue]}${HISTDB_SESSION}${reset_color}"
@@ -157,7 +157,7 @@ histdb-fzf-widget() {
     mode=$((($mode % $#modes) + 1))
     histdb-fzf-log "mode changed to ${modes[$mode]} ($mode)"
     result=( "${(f@)$( histdb-fzf-query ${cmd_opts} |
-      FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $ORIG_FZF_DEFAULT_OPTS --ansi --header='$typ 
+      FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $ORIG_FZF_DEFAULT_OPTS --ansi --header='$typ
 ${bold_color}F1: session F2: directory F3: global${reset_color}' -n2.. --with-nth=2.. --tiebreak=index --expect='esc,ctrl-r,f1,f2,f3' --print-query --preview='source ${FZF_HISTDB_FILE}; histdb-detail ${HISTDB_FILE} {1}' --preview-window=right:${HISTDB_FZF_PREVIEW_WIDTH:-50}%:wrap --ansi --no-hscroll --query=${query} +m" $(__fzfcmd))}" )
     histdb-fzf-log "result was $result"
     histdb-fzf-log "returncode was $?"
@@ -183,7 +183,7 @@ ${bold_color}F1: session F2: directory F3: global${reset_color}' -n2.. --with-nt
   histdb-fzf-log "set lbuffer = $LBUFFER"
   zle redisplay
   typeset -f zle-line-init >/dev/null && zle zle-line-init
-  
+
   return $ret
 }
 zle     -N   histdb-fzf-widget
