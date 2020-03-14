@@ -127,7 +127,7 @@ histdb-fzf-widget() {
     mode=1
   fi
   
-  if [[ "${HISTDB_FZF_DEFAULT_MODE}" =~ [012] ]];then
+  if [[ "${HISTDB_FZF_DEFAULT_MODE}" =~ [123] ]];then
     mode=${HISTDB_FZF_DEFAULT_MODE}
   fi
   
