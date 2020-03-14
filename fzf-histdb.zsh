@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 FZF_HISTDB_FILE="${(%):-%N}"
 
 HISTDB_FZF_LOGFILE=~/fzfhistlog
@@ -85,11 +86,10 @@ histdb-detail(){
         history
         left join commands on history.command_id = commands.id
         left join places on history.place_id = places.id
-      where ${where})
+      where ${where} limit 1)
   "
 
-  array=("${(@f)$(sqlite3 -cmd ".timeout 1000" "${HISTDB_FILE}" -separator "
-" "$query" )}")
+  array=("${(@s/\t/)$(sqlite3 -cmd ".timeout 1000" "${HISTDB_FILE}" -separator "\t" "$query" )}")
 
   if [[ ! ${array[2]} ]];then
     #Color exitcode red if not 0
@@ -102,7 +102,8 @@ histdb-detail(){
     # Duration yellow if > 1 min
     array[3]=$(echo "\033[33m${array[3]}\033[0m")
   fi
-  printf "\033[1mLast run\033[0m\n\nTime:      %s\nStatus:    %s\nDuration:  %s sec.\nHost:      %s\nDirectory: %s\nSessionid: %s\nCommand:\n\n\t\033[1m%s\n\033[0m" "${array[@]}"
+
+  printf "\033[1mLast run\033[0m\n\nTime:      %s\nStatus:    %s\nDuration:  %s sec.\nHost:      %s\nDirectory: %s\nSessionid: %s\nCommand:\n\n\033[1m%s\n\033[0m" "${array[@]}"
 }
 
 histdb-fzf-log() {
