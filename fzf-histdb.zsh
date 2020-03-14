@@ -126,6 +126,11 @@ histdb-fzf-widget() {
   else
     mode=1
   fi
+  
+  if [[ "${HISTDB_FZF_DEFAULT_MODE}" =~ [012] ]];then
+    mode=${HISTDB_FZF_DEFAULT_MODE}
+  fi
+  
   histdb-fzf-log "Start mode ${modes[$mode]} ($mode)"
   exitkey='ctrl-r'
   setopt localoptions noglobsubst noposixbuiltins pipefail 2> /dev/null
