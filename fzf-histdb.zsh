@@ -151,7 +151,7 @@ histdb-fzf-widget() {
         typ="Directory local history ${fg[blue]}$(pwd)${reset_color}"
         ;;
       'global')
-        cmd_opts=""
+        cmd_opts="${HISTDB_FZF_GLOBAL_OPTS}"
         typ='global history'
         ;;
     esac
